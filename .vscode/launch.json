@@ -1,0 +1,28 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "启动项目",
+      "program": "${workspaceFolder}/index.js",
+      "request": "launch",
+      "runtimeExecutable": "/home/ader/.nvm/versions/node/v22.16.0/bin/yarn",
+      "runtimeArgs": ["start"],
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "运行当前程序",
+      "program": "${file}",
+      "request": "launch",
+      "runtimeExecutable": "/home/ader/.nvm/versions/node/v22.16.0/bin/yarn",
+      "runtimeArgs": ["node"],
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node",
+      "console": "integratedTerminal"
+    }
+  ]
+}

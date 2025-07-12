@@ -11,3 +11,6 @@
 
 #!.yarn/cache
 .pnp.*
+
+# 环境变量
+.env
