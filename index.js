@@ -31,11 +31,27 @@ todo:
 import { json } from "node:stream/consumers";
 import { initSenders, initJudgeModel } from "./src/senders.js";
 import { readFile } from "node:fs/promises";
+import readline from "node:readline";
 import chalk from "chalk";
+function simplePrompt(query) {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-async function whoWillSend(preText, model) {
+    rl.question(query, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function whoWillSend(config, preText, model) {
   let senderName = model.getText(
-    `这是一个聊天室。请根据以下内容，预测下一位发言的是谁。仅当其他用户不需要回答的时候让上一个用户接着发言。\n${JSON.stringify(preText)}`,
+    `${config.judgeModel.promt}\n${JSON.stringify(preText)}`,
   );
   return senderName;
 }
@@ -44,13 +60,14 @@ async function getSenderMessage(senders, senderName, preText) {
   let senderMessage;
   let sender = senders.find((item) => item.role === senderName);
   if (senderName === "user") {
-    let userInput = prompt();
+    let userInput = await simplePrompt(chalk.red.bold("用户") + ":");
+    console.log("----------------------------");
     if (userInput === "exit") {
       console.log("拜拜");
       //程序停止
       return "exit";
     } else {
-      senderMessage = prompt();
+      senderMessage = [{ text: userInput, role: "user" }];
     }
   } else {
     senderMessage = await sender.getText(preText);
@@ -58,13 +75,15 @@ async function getSenderMessage(senders, senderName, preText) {
   return senderMessage;
 }
 function show(curMessage) {
-  curMessage = console.log(
-    chalk.red.bold(`${curMessage[0].role}`) +
-      `:` +
-      `${curMessage[0].text}` +
-      `\n` +
-      `----------------------------`,
-  );
+  if (curMessage[0].role !== "user") {
+    curMessage = console.log(
+      chalk.red.bold(`${curMessage[0].role}`) +
+        `:` +
+        `${curMessage[0].text}` +
+        `\n` +
+        `----------------------------`,
+    );
+  }
 }
 function updatePre(preText, curMessage) {
   preText = [...preText, ...curMessage];
@@ -96,10 +115,11 @@ async function main(configAddress, preTextAddress) {
   console.log("你好！");
   while (true) {
     //判断senderName。
-    let senderName = await whoWillSend(preText, initJudgeModel(config));
+    let senderName = await whoWillSend(config, preText, initJudgeModel(config));
     //获取curMessage。采用senders[senderName].getText
 
     //console.log(senders, senderName, preText);
+    await delay(1000);
     curMessage = await getSenderMessage(senders, senderName, preText);
 
     if (curMessage === "exit") {

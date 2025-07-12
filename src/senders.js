@@ -29,12 +29,28 @@ class BaseAi {
     throw new Error("函数还没有被实现");
   }
 
-  async getText(preText) {
-    const response = await this._getText([...this.myPreText, ...preText]);
-    [...preText, textToMessage(response, this.role)].forEach((item) =>
-      bsgtDebuger(item),
-    );
-    return [textToMessage(response, this.role)];
+  async getText(preText, { retries = 3, delay = 2000 } = {}) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await this._getText([...this.myPreText, ...preText]);
+        [...preText, textToMessage(response, this.role)].forEach((item) =>
+          bsgtDebuger(item),
+        );
+        return [textToMessage(response, this.role)];
+      } catch (err) {
+        if (i < retries - 1) {
+          console.log(
+            `Attempt ${i + 1} failed for ${
+              this.role
+            }. Retrying in ${delay / 1000}s...`,
+          );
+          await new Promise((res) => setTimeout(res, delay));
+        } else {
+          console.error(`All ${retries} attempts failed for ${this.role}.`);
+          throw err;
+        }
+      }
+    }
   }
 }
 
@@ -69,6 +85,11 @@ class GeminiAi extends BaseAi {
       return content;
     }
     const contents = messages.map((item) => trans(item));
+    if (contents.at(-1).role === "model") {
+      contents.at(-1).parts[0].text =
+        `你的上一条消息:${contents.at(-1).parts[0].text}`;
+      contents.at(-1).role = "user";
+    }
     return contents;
   }
   async _getText(messages) {
@@ -81,6 +102,7 @@ class GeminiAi extends BaseAi {
       throw new Error("参数应为messages或string");
     }
     let response;
+
     try {
       response = await this.ai.models.generateContent({
         model: this.model,

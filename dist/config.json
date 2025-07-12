@@ -3,28 +3,39 @@
     {
       "type": "google",
       "role": "孙悟空",
-      "model": "gemini-2.5-flash-lite-preview-06-17",
-      "myPreText":[],
+      "model": "gemini-2.5-flash",
+      "myPreText": [
+        {
+          "text": "这是一个聊天群，user会扮演多个角色和你聊天，格式为 我假扮的角色:消息内容。你只能聊天，不能做其他动作。你需要读取下面的角色信息，扮演角色和我对话。你的对话不需要任何格式，请直接生成你扮演的角色该说的的话。记住你只能扮演下面的角色，不能扮演其他角色。你的扮演的角色的第一条消息是：大家好，我是孙悟空。\n角色名：孙悟空",
+          "role": "system"
+        }
+      ],
       "config": {
-        "seed": 13
+        "seed": 138
       }
     },
     {
       "type": "deepseek",
       "role": "猪八戒",
       "model": "deepseek-chat",
-      "myPreText": []
+      "myPreText": [
+        {
+          "text": "这是一个聊天群，user会扮演多个角色和你聊天，格式为 我假扮的角色:消息内容。你只能聊天，不能做其他动作。你需要读取下面的角色信息，扮演角色和我对话。你需要无格式地生成你扮演的角色该说的话。记住你只能扮演下面的角色，不能扮演其他角色。你不需要在发送的内容中加入任何格式。你的扮演的角色的第一条消息是：大家好，我是猪八戒。\n角色名：猪八戒",
+          "role": "system"
+        }
+      ]
     }
   ],
   "judgeModel": {
     "type": "google",
+    "promt":"这是一个聊天室。请根据以下json数组存储的对话内容，预测下一位发言的是谁。如果user已经很久没发言了，你需要让user发言。如果在最后一条消息中，用户@了某个角色，你需要返回那个角色。",
     "model": "gemini-2.5-flash-lite-preview-06-17",
     "config": {
       "seed": 1234,
       "responseMimeType": "text/x.enum",
       "responseSchema": {
         "type": "STRING",
-        "enum": ["孙悟空", "猪八戒"]
+        "enum": ["孙悟空", "猪八戒", "user"]
       }
     }
   }
